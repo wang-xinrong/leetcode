@@ -30,35 +30,33 @@ class Solution:
             
         return result
 
-    def findSubstring(self, s: str, words: List[str]) -> List[int]:
-        length = len(words[0])
-        word_count = Counter(words)
-        indexes = []
+    def findSubstring_faster(self, s: str, words: List[str]) -> List[int]:
+        word_dict = Counter(words)
+        word_size = len(words[0])
+        res = []
+        for i in range(word_size):
+            words_used=0
+            words_found=defaultdict(int)
+            start=i
+            for j in range(i, len(s) - word_size + 1, word_size):
+                new_word=s[j:j+word_size]
 
-        for i in range(length):
-            start = i
-            window = defaultdict(int)
-            words_used = 0
-
-            for j in range(i, len(s) - length + 1, length):
-                word = s[j:j + length]
-
-                if word not in word_count:
-                    start = j + length
-                    window = defaultdict(int)
-                    words_used = 0
+                if new_word not in word_dict:
+                    # the loop has to restart
+                    start=j+word_size
+                    words_used=0
+                    words_found=defaultdict(int)
                     continue
 
-                words_used += 1
-                window[word] += 1
-
-                while window[word] > word_count[word]:
-                    window[s[start:start + length]] -= 1
-                    start += length
-                    words_used -= 1
+                # the current word is valid, we update relevant variables
+                words_used+=1
+                words_found[new_word]+=1
+                while words_found[new_word] > word_dict[new_word]:
+                    words_found[s[start:start+word_size]]-=1
+                    start+=word_size
+                    words_used-=1
 
                 if words_used == len(words):
-                    indexes.append(start)
+                    res.append(start)
 
-        return indexes
-
+        return res
